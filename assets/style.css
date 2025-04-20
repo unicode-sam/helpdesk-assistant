@@ -80,7 +80,7 @@ background: linear-gradient(to right, #292a90, #1b1662,#686fc1, #73bcc0);
 }
 
 .call-slider {
-    width: 160px; /* Increased from 130px */
+    width: 170px; /* Increased from 130px */
     height: 50px;
     border-radius: 50px;
     background-color: #28a745;
@@ -114,7 +114,7 @@ background: linear-gradient(to right, #292a90, #1b1662,#686fc1, #73bcc0);
 }
 
 .call-slider.on .call-knob {
-    left: 115px; /* Adjusted for new width */
+    left: 125px; /* Adjusted for new width */
     background-image: url('https://img.icons8.com/ios-filled/24/000000/headphones.png');
 }
 

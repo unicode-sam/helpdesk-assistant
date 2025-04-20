@@ -1,6 +1,8 @@
 # helpdesk-assistant
 A purposeful chatbot cum call center assisatnt
 
-![Default Landing PAge](image-2.png)
+## Landing Page for agent callcenter page
+![Landing Page](images\Landing.png)
 
-![During Conversation](image-3.png)
+## A scrrenshot for teh Dashboard in action
+![Dashboard](images\Dashboard_in_Action.png)
