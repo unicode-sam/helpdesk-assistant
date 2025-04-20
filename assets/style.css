@@ -78,6 +78,55 @@ background: linear-gradient(to right, #292a90, #1b1662,#686fc1, #73bcc0);
     text-align: left;
     overflow: auto;
 }
+
+.call-slider {
+    width: 160px; /* Increased from 130px */
+    height: 50px;
+    border-radius: 50px;
+    background-color: #28a745;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.4s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    user-select: none;
+}
+
+.call-slider.on {
+    background-color: #dc3545;
+}
+
+.call-knob {
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    transition: left 0.4s ease;
+    background-image: url('https://img.icons8.com/ios-filled/24/000000/phone.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 20px 20px;
+}
+
+.call-slider.on .call-knob {
+    left: 115px; /* Adjusted for new width */
+    background-image: url('https://img.icons8.com/ios-filled/24/000000/headphones.png');
+}
+
+#call-text {
+    flex: 1;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    z-index: 1;
+    margin-left: 10px;
+    margin-right: 10px;
+}
 h3{
     border: 1px solid black;
     /* padding: 5px; */

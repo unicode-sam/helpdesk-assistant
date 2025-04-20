@@ -35,18 +35,37 @@ app.layout = dbc.Container([
 
         ], md=5), 
 
-        # Right Column – 45% Width
-        dbc.Col([
-            html.H2("Sentiment Graph"),
-            html.Div(
-                dcc.Graph(id="line-graph"),
-                className="graph-div"
-                
+        dbc.Col(
+    [
+        # Top Row: Call Slider aligned with Search bar
+        dbc.Row(
+            dbc.Col(
+                html.Div(
+                    id="call-toggle",
+                    children=[
+                        html.Div(id="call-knob", className="call-knob"),
+                        html.Span(id="call-text", children="Pick Up"),
+                    ],
+                    className="call-slider off",
+                    n_clicks=0
+                ),
+                width="auto",
+                style={"marginBottom": "15px"}
             ),
+            justify="end"
+        ),
 
-            html.H3("Suggestions", className="mt-4"),
-            html.Div("Suggestions will appear here...",id="suggestions", className="suggestions-div")
-        ], md=7) 
+        html.H2("Sentiment Graph"),
+        html.Div(
+            dcc.Graph(id="line-graph"),
+            className="graph-div"
+        ),
+
+        html.H3("Suggestions", className="mt-4"),
+        html.Div("Suggestions will appear here...", id="suggestions", className="suggestions-div")
+    ],
+    md=7
+)
     ])
 ], fluid=True)
 
@@ -106,5 +125,18 @@ Offer Additional Help: "If you ever encounter any more issues or need further as
     if n_clicks:
         return transcript,summary,suggestion,fig
     return no_update,no_update,no_update,no_update
+
+@callback(
+    Output("call-toggle", "className"),
+    Output("call-text", "children"),
+    Input("call-toggle", "n_clicks"),
+    prevent_initial_call="initial_duplicate"
+)
+def toggle_call_slider(n_clicks):
+    if n_clicks % 2 == 0:
+        return "call-slider off", "Pick Up"
+    else:
+        return "call-slider on", "Listening..."
+
 if __name__ == '__main__':
     app.run(debug=True)
