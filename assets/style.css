@@ -62,12 +62,14 @@ background: linear-gradient(to right, #292a90, #1b1662,#686fc1, #73bcc0);
     border-radius: 5px;
     background-color: #f9f9f9;
 }
-.summary-div{
+.customer-div{
     margin:5px;
     border:1px solid grey;
     padding: 10px;
     max-height: 300px;
     overflow: auto;
+    white-space: pre-wrap;
+    text-align: left;
 }
 
 .suggestions-div{

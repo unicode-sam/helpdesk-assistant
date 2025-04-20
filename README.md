@@ -5,4 +5,4 @@ A purposeful chatbot cum call center assisatnt
 ![Landing Page](images/Landing.png)
 
 ## A scrrenshot for teh Dashboard in action
-![Dashboard](images/Dashboard_in_Action.png)
+![Dashboard](images/Dashboard.png)

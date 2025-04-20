@@ -27,12 +27,14 @@ app.layout = dbc.Container([
                 justify="start"
             ),
 
+            html.H3("Customer Details..", className="mt-4"),
+            html.Div("Customer Details Here...", id="customer", className="customer-div"),
             html.Hr(),
             html.H3("Transcript"),
             html.Div("Transcript Here....", id="transcript", className="transcript-div"),
 
-            html.H3("Summary", className="mt-4"),
-            html.Div("Summary...", id="summary", className="summary-div"),
+            # html.H3("Summary", className="mt-4"),
+            # html.Div("Summary...", id="summary", className="summary-div"),
 
         ], md=5),
 
@@ -72,7 +74,7 @@ app.layout = dbc.Container([
 
 @callback(
     Output("transcript", "children"),
-    Output("summary", "children"),
+    Output("customer", "children"),
     Output("suggestions", "children"),
     Output("line-graph", "figure"),
     Output("call-toggle", "className"),
@@ -82,6 +84,9 @@ app.layout = dbc.Container([
 )
 def toggle_call_slider_and_update_dashboard(n_clicks):
     summary="""In this call, Ramesh Kumar contacts ABC Bank's online banking support after facing login issues with his account. He informs the agent, Priya, that despite entering the correct credentials, he's receiving an “Invalid Credentials” error. After verifying his identity, Priya learns that Ramesh had recently changed his password. She suspects the system may have flagged his account due to multiple login attempts or session timeout. To resolve the issue, Priya guides him through the password reset process, including submitting his user ID and mobile number, entering the received OTP, and setting a new secure password. Ramesh successfully logs in with the new credentials and expresses his gratitude. Priya confirms that everything is now functioning properly and offers further assistance, which Ramesh declines. The call ends on a positive note, with both parties exchanging pleasantries. The issue is resolved efficiently with courteous and professional support."""
+    customer="""Name: Ramesh Kumar\n
+Ticket ID: REQ7890761\n
+Ticket Issue: Unable to log into online banking account due to "Invalid Credentials" error despite correct details."""
     transcript="""Agent: Good afternoon! You've reached ABC Bank's Online Banking Support. My name is Priya. May I know who I'm speaking with?\n
 Customer: Hi Priya, this is Ramesh Kumar. I'm having some trouble logging into my online banking account.\n
 Agent: I'm sorry to hear that, Mr. Kumar. I'll be happy to assist you. Could you please confirm your registered mobile number and the last 4 digits of your account number for verification?\n
@@ -133,7 +138,7 @@ Offer Additional Help: "If you ever encounter any more issues or need further as
     if n_clicks % 2 == 0:
         return no_update, no_update, no_update, no_update, "call-slider off", "Pick Up"
     else:
-        return transcript, summary, suggestion, fig, "call-slider on", "Listening..."
+        return transcript, customer, suggestion, fig, "call-slider on", "Listening..."
 
 if __name__ == '__main__':
     app.run(debug=True)
