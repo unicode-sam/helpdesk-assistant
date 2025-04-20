@@ -1,2 +1,3 @@
 # helpdesk-assistant
-A purposefu chatbot cum call center assisatnt
+A purposeful chatbot cum call center assisatnt
+![alt text](image-1.png)
