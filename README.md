@@ -46,7 +46,7 @@ Built with a responsive **Dash** interface, this Python-based tool seamlessly pr
 2. Set the environment variable or point to your key file in your code.
 3. Run the app using:
    ```bash
-   python firstDash.py
+   python app.py
    ```
 
 ---
