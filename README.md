@@ -68,20 +68,9 @@ Built with a responsive **Dash** interface, this Python-based tool seamlessly pr
 - Customize landing pages based on **user role** (Agent vs Manager).
 - Introduce **call scoring** and performance badges for motivation and gamification.
 
-## 🗒️ Note
-
-- This is my first attempt at Dash and frontend overall.so the callbacks are kinda clunky.
-- I am continuing to improve prompts and all. This project is kinda in an experiment phase.
-- I have a big vision this is the first release.
-
 ## 🤝 Contributions & Feedback
 
 Pull requests and issues are welcome! Let’s make helpdesk analytics smarter together 🚀
----
-## 🤝 Contributions & Feedback
-
-Pull requests and issues are welcome! Let’s make helpdesk analytics smarter together 🚀
-
 
 ---
 
