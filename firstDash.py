@@ -3,6 +3,96 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
+from threading import Thread,Event
+import datetime
+import speech_recognition as sr
+from functions.model_utils import Model
+from functions.db_utils import update_chat,update_conv_and_fetch,clear_db,update_session_table,get_full_conv,get_chat_details
+from functions.auth_utils import create_session
+
+class CallCenter():
+    def __init__(self,stop_event):
+        # clear_db("conv")
+        # clear_db("chat_update")
+        self.session_id,self.session_ts=create_session()
+        self.ticket_id=""
+        self.stop_event = stop_event 
+
+    def listen(self):
+        r = sr.Recognizer()
+        with sr.Microphone() as source:
+            print("\nListening... \n")
+            r.pause_threshold = 20  # cut the audio for pause more than 8 sec
+
+            while not self.stop_event.is_set():  # Check the stop event
+                try:
+                    audio_ = r.listen(source, 30, 20)  # 20 seconds first time, 10 second chunks
+                    self.recog(audio_) #Call the recog function directly
+                except sr.WaitTimeoutError:
+                    print("No speech detected for a while. Continuing to listen...")
+                    continue  # Continue listening if no speech is detected within the timeout
+                except Exception as e:
+                    print("Error in listening loop:", e)
+                    break  # Exit loop on error
+            print("Listening stopped.")
+
+    def recog(self,audio_):
+        r = sr.Recognizer()
+        try:
+            query = r.recognize_google(audio_, language='en-us')
+            print(query)
+            final_query = update_conv_and_fetch(query)
+            self.analysis(final_query)
+
+        except Exception as e:
+            print("Unable to understand.", e)
+
+    def analysis(self,conv):
+        # conv=update_conv_and_fetch(conv)
+        print("Hello inside Analysis")
+        m=Model()
+        transcript=m.transcript(conv)
+        intent,summary,sentiment,suggestion,status=m.call_analysis(transcript)
+        update_chat(intent,summary,sentiment,suggestion,status)
+        # update_session_table(self.session_id,self.session_ts,intent,transcript)
+        # self.create_ts=datetime.datetime.now()
+        # update_existing_ticketID(self.session_id,self.ticket_id,intent,summary,self.create_ts,status)
+
+    def existing_ticket(self,ticket_id):
+        self.ticket_id=ticket_id
+        self.create_ts=datetime.datetime.now()
+    
+    def new_ticket(self):
+        self.ticket_id,self.create_ts=create_ticket()
+
+# Global variables to manage the call state and thread
+stop_listening_event = Event()
+listening_thread = None
+call_center_instance = None
+
+def get_details():
+    conv=get_full_conv()
+    m=Model()
+    transcript=m.transcript(conv)
+    summary,suggestion,sentiment=get_chat_details()
+    return transcript,summary,suggestion,sentiment
+
+
+def start_call():
+    global call_center_instance, listening_thread, stop_listening_event
+    stop_listening_event.clear()  # Ensure the event is clear before starting
+    call_center_instance = CallCenter(stop_listening_event)
+    listening_thread = Thread(target=call_center_instance.listen)
+    listening_thread.daemon = True  # Allow the main thread to exit even if this thread is running
+    listening_thread.start()
+
+
+def end_call():
+    global stop_listening_event, listening_thread
+    if listening_thread and listening_thread.is_alive():
+        stop_listening_event.set()  # Signal the thread to stop
+        listening_thread.join()  # Wait for the thread to finish
+    print("Call ended.")
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -27,8 +117,8 @@ app.layout = dbc.Container([
                 justify="start"
             ),
 
-            html.H3("Customer Details..", className="mt-4"),
-            html.Div("Customer Details Here...", id="customer", className="customer-div"),
+            html.H3("Summary", className="mt-4"),
+            html.Div("Summary Here...", id="customer", className="customer-div"),
             html.Hr(),
             html.H3("Transcript"),
             html.Div("Transcript Here....", id="transcript", className="transcript-div"),
@@ -69,7 +159,12 @@ app.layout = dbc.Container([
             ],
             md=7
         )
-    ])
+    ]),
+    dcc.Interval(
+        id='interval-component',
+        interval=15 * 1000,  # in milliseconds (15 seconds)
+        n_intervals=0  # number of times the interval has passed
+    )
 ], fluid=True)
 
 @callback(
@@ -80,65 +175,46 @@ app.layout = dbc.Container([
     Output("call-toggle", "className"),
     Output("call-text", "children"),
     Input("call-toggle", "n_clicks"),
-    prevent_initial_call="initial_duplicate"
+    Input("interval-component","n_intervals"),
+    prevent_initial_call=True
 )
-def toggle_call_slider_and_update_dashboard(n_clicks):
-    summary="""In this call, Ramesh Kumar contacts ABC Bank's online banking support after facing login issues with his account. He informs the agent, Priya, that despite entering the correct credentials, he's receiving an “Invalid Credentials” error. After verifying his identity, Priya learns that Ramesh had recently changed his password. She suspects the system may have flagged his account due to multiple login attempts or session timeout. To resolve the issue, Priya guides him through the password reset process, including submitting his user ID and mobile number, entering the received OTP, and setting a new secure password. Ramesh successfully logs in with the new credentials and expresses his gratitude. Priya confirms that everything is now functioning properly and offers further assistance, which Ramesh declines. The call ends on a positive note, with both parties exchanging pleasantries. The issue is resolved efficiently with courteous and professional support."""
-    customer="""Name: Ramesh Kumar\n
-Ticket ID: REQ7890761\n
-Ticket Issue: Unable to log into online banking account due to "Invalid Credentials" error despite correct details."""
-    transcript="""Agent: Good afternoon! You've reached ABC Bank's Online Banking Support. My name is Priya. May I know who I'm speaking with?\n
-Customer: Hi Priya, this is Ramesh Kumar. I'm having some trouble logging into my online banking account.\n
-Agent: I'm sorry to hear that, Mr. Kumar. I'll be happy to assist you. Could you please confirm your registered mobile number and the last 4 digits of your account number for verification?\n
-Customer: Sure. My mobile number is 9876543210, and the last 4 digits of my account number are 3321.\n
-Agent: Thank you for verifying the details. May I know what exactly happens when you try to log in?\n
-Customer: Yeah, I enter my user ID and password, but it says "Invalid Credentials." I'm sure I'm entering the correct details.\n
-Agent: Understood. Just to confirm, have you recently changed your password?\n
-Customer: Yes, I changed it last week. It worked fine then, but today it's not letting me in.\n
-Agent: Alright. It's possible the system flagged it due to multiple login attempts or a session timeout. Let's try resetting the password once again just to be sure. Would you like me to walk you through the steps?\n
-Customer: Yes, please. That would help.\n
-Agent: Great. First, go to our official website and click on “Forgot Password” under the login fields. Are you there?\n
-Customer: Yes, I'm on that page.\n
-Agent: Perfect. Now enter your User ID and the registered mobile number, then click “Submit.” You should receive a one-time password on your phone.\n
-Customer: Got it. Just entered the OTP… Done.\n
-Agent: Now, you can create a new password. Please make sure it's at least 8 characters, with a mix of letters, numbers, and a special character.\n
-Customer: Okay, I've reset it.\n
-Agent: Wonderful. Now try logging in with the new password.\n
-Customer: Hold on… logging in… Yep, I'm in! That worked. Thanks a lot, Priya!\n
-Agent: You're most welcome, Mr. Kumar! Is there anything else I can help you with today?\n
-Customer: Nope, that was all. Thanks again for the help!\n
-Agent: Anytime! Have a great day and thank you for banking with ABC Bank. Take care!\n
-Customer: You too. Bye!\n"""
-    suggestion="""Follow-Up Reminder: "Before you go, I recommend updating your password recovery options to ensure future access to your account is easier. Would you like to update them now?"\n
-Customer Satisfaction Check: "I'm glad I could assist you today, Mr. Kumar. If you need any further assistance, don't hesitate to reach out. Would you be able to rate your experience for me?"\n
-Offer Additional Help: "If you ever encounter any more issues or need further assistance, feel free to call or chat with us again. We're here to help anytime!\n"""
-    
-    x_values = np.arange(1, 51)
+def toggle_call_slider_and_update_dashboard(n_clicks,n_intervals):
+    global listening_thread
 
-# Generate y values to simulate a "roller coaster" of emotions (random fluctuations)
-    y_values = np.sin(np.linspace(0, 10, 50)) + np.random.normal(0, 0.5, 50)
-    
-    fig = go.Figure(
-        data=[go.Scatter(
-            x=x_values,
-            y=y_values,
-            mode='lines+markers',
-            name='Customer Sentiment',
-            line=dict(color='green')
-        )],
-        layout=go.Layout(
-            title='Customer Sentiment',
-            xaxis_title='Iterations',
-            yaxis_title='Sentiment',
-            hovermode='closest'
-        )
-    )
+    is_listening = listening_thread and listening_thread.is_alive()
 
-    # Toggle button state
     if n_clicks % 2 == 0:
+        if is_listening:
+            end_call()  # Stop the listening thread
         return no_update, no_update, no_update, no_update, "call-slider off", "Pick Up"
     else:
-        return transcript, customer, suggestion, fig, "call-slider on", "Listening..."
+        if not is_listening:
+            start_call() # start call if call is not in the middle of listening
 
+        if is_listening:
+            transcript,summary,suggestion,sentiment=get_details()
+
+            x_values=[]
+            for i in range(0,len(sentiment)+1):
+                x_values.append(i)
+            
+            fig = go.Figure(
+                data=[go.Scatter(
+                    x=x_values,
+                    y=sentiment,
+                    mode='lines+markers',
+                    name='Customer Sentiment',
+                    line=dict(color='green')
+                )],
+                layout=go.Layout(
+                    title='Customer Sentiment',
+                    xaxis_title='Iterations',
+                    yaxis_title='Sentiment',
+                    hovermode='closest'
+                )
+            )
+            return transcript, summary, suggestion, fig, "call-slider on", "Listening..."
+        else:
+            return no_update,no_update,no_update,no_update, "call-slider on", "Listening..."
 if __name__ == '__main__':
     app.run(debug=True)
