@@ -61,9 +61,6 @@ class CallCenter():
     def existing_ticket(self,ticket_id):
         self.ticket_id=ticket_id
         self.create_ts=datetime.datetime.now()
-    
-    def new_ticket(self):
-        self.ticket_id,self.create_ts=create_ticket()
 
 # Global variables to manage the call state and thread
 stop_listening_event = Event()
