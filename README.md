@@ -57,7 +57,7 @@ Built with a responsive **Dash** interface, this Python-based tool seamlessly pr
 ![Landing](images/Landing.png)
 
 ### 🔹 Dashboard in Action
-![Dashboard](images/Dashboard.jpg)
+![Dashboard](images/Dashboard.png)
 
 ---
 
