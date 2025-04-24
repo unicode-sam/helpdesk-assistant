@@ -69,3 +69,15 @@ Built with a responsive **Dash** interface, this Python-based tool seamlessly pr
 - Introduce **call scoring** and performance badges for motivation and gamification.
 
 ---
+## 🤝 Contributions & Feedback
+
+Pull requests and issues are welcome! Let’s make helpdesk analytics smarter together 🚀
+
+
+---
+
+### 🗒️ Note
+
+This is my first attempt at building with **Dash** and working on the frontend side overall. Some callbacks might feel a bit clunky, but I'm actively improving them. The project is still in its **experimental phase**, and I'm also refining the prompts and AI responses.
+
+This marks the **first release** of a much **bigger vision** I’m working toward. More updates and improvements coming soon!
